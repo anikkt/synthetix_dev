@@ -1,1 +1,6 @@
+case_id,activity,timestamp,vendor,cost
+REQ_801,Create Requisition,2026-03-10 08:00:00,AlphaVendor,500
+REQ_801,Approve Requisition,2026-03-10 11:00:00,AlphaVendor,500
+REQ_801,Send PO,2026-03-11 09:00:00,AlphaVendor,500
+REQ_801,Receive Goods,2026-03-14 15:00:00,AlphaVendor,500
 
