@@ -1,1 +1,8 @@
 
+case_id,activity,timestamp,customer,amount
+ORD_101,Create Order,2026-03-01 09:00:00,TechCorp,1500
+ORD_101,Approve Credit,2026-03-01 10:15:00,TechCorp,1500
+ORD_101,Ship Goods,2026-03-02 14:00:00,TechCorp,1500
+ORD_101,Send Invoice,2026-03-03 08:30:00,TechCorp,1500
+ORD_102,Create Order,2026-03-01 09:30:00,InnoSys,3200
+ORD_102,Ship Goods,2026-03-02 16:00:00,InnoSys,3200
