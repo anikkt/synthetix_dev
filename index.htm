@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Process Intelligence Platform</title>
+
+  <!-- CSS Bundles -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/process.css">
+  <link rel="stylesheet" href="css/etl.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/tables.css">
+  <link rel="stylesheet" href="css/notifications.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div id="app-container">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-title">Process<span>Intel</span></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-item active" data-view="newsource">
+          <span class="icon">📥</span>
+          <span class="label">New Source</span>
+        </div>
+        <div class="nav-item" data-view="existingdata">
+          <span class="icon">🗄️</span>
+          <span class="label">Data Hub</span>
+        </div>
+        <div class="nav-item" data-view="processflow">
+          <span class="icon">🔄</span>
+          <span class="label">Process Mining</span>
+        </div>
+        <div class="nav-item" data-view="dashboards">
+          <span class="icon">📊</span>
+          <span class="label">Dashboard Studio</span>
+        </div>
+        <div class="nav-item" data-view="profile">
+          <span class="icon">👤</span>
+          <span class="label">User Profile</span>
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div>Process Intelligence v2.0</div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEWPORT -->
+    <main id="main-viewport">
+      
+      <!-- NAVBAR -->
+      <header id="navbar">
+        <div class="nav-global-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search tables, dashboards, processes (Ctrl+K)...">
+        </div>
+        <div class="nav-actions">
+          <button class="icon-btn" title="AI Copilot">🤖</button>
+          <button class="icon-btn" title="Notifications">🔔<span class="badge-dot"></span></button>
+        </div>
+      </header>
+
+      <!-- CONTENT AREA -->
+      <section id="content-area">
+
+        <!-- VIEW: NEW SOURCE -->
+        <div class="view-panel active" id="view-newsource">
+          <h1>Extract & Ingest Data</h1>
+          <p class="card-subtitle">Connect files, event logs, and external sources to the warehouse.</p>
+          <div class="etl-tile-grid" style="margin-top:20px;">
+            <div class="etl-tile" onclick="document.getElementById('fileInput').click()">
+              <div>📂</div>
+              <div class="tile-title">Upload Files</div>
+              <p class="card-subtitle">CSV, XLSX, XES, TSV</p>
+            </div>
+          </div>
+          <input type="file" id="fileInput" multiple accept=".csv,.tsv,.xlsx,.xes" style="display:none;">
+        </div>
+
+        <!-- VIEW: EXISTING DATA (DATA HUB) -->
+        <div class="view-panel" id="view-existingdata">
+          <h1>Data Hub & Transformations</h1>
+          <div class="card" style="margin-top:16px;">
+            <div class="card-title">Warehouse Tables</div>
+            <div class="table-scroll" style="margin-top:12px;">
+              <table class="datatable" id="existingDataTable">
+                <thead>
+                  <tr><th>Name</th><th>Rows</th><th>Columns</th><th>Action</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">SQL Transformation Engine</div>
+            <textarea id="sqlInput" style="width:100%; height:80px; margin-top:8px;" placeholder="SELECT region, SUM(amount) FROM sales GROUP BY region"></textarea>
+            <div style="display:flex; gap:12px; margin-top:10px;">
+              <input type="text" id="saveAsName" placeholder="Save result as table name...">
+              <button id="runSqlBtn">Execute SQL</button>
+            </div>
+            <div id="sqlErr" style="color:var(--accent-danger); font-size:12px; margin-top:6px;"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Table Preview</div>
+            <div id="previewArea" class="table-scroll" style="margin-top:8px;"></div>
+          </div>
+        </div>
+
+        <!-- VIEW: PROCESS MINING -->
+        <div class="view-panel" id="view-processflow">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Process Mining Explorer</h1>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <table class="datatable" id="processFlowListTable">
+              <thead>
+                <tr><th>Name</th><th>ID</th><th>Creator</th><th>Created</th><th>Last Editor</th><th>Edited</th><th>Action</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VIEW: PROCESS FLOW DETAIL -->
+        <div class="view-panel" id="view-processflowdetail">
+          <button onclick="showView('processflow')" class="secondary">&larr; Back to Process Flows</button>
+          <div style="margin-top:12px; display:flex; gap:12px; align-items:center;">
+            <input type="text" id="pfTitleInput" style="font-size:18px; font-weight:700;">
+          </div>
+          <div class="pf-controls-bar" style="margin-top:16px;">
+            <label style="font-size:12px;">Activities Filter: 
+              <input type="range" id="pfActivitySlider" min="1" max="100" value="100">
+            </label>
+            <label style="font-size:12px;">Paths Filter: 
+              <input type="range" id="pfPathSlider" min="1" max="100" value="100">
+            </label>
+          </div>
+          <div class="pf-container">
+            <div id="processFlowCanvas" class="pf-scroll"></div>
+          </div>
+        </div>
+
+        <!-- VIEW: PROCESS FLOW DATA MAPPING -->
+        <div class="view-panel" id="view-processflowdata">
+          <h1>Map Process Log Columns</h1>
+          <div class="card" style="margin-top:16px;">
+            <select id="pf-table"><option value="">Select Table</option></select>
+            <div style="display:flex; gap:12px; margin-top:12px;">
+              <div><label>Case ID:</label><select id="pf-case"></select></div>
+              <div><label>Activity:</label><select id="pf-activity"></select></div>
+              <div><label>Timestamp:</label><select id="pf-time"></select></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW: DASHBOARDS -->
+        <div class="view-panel" id="view-dashboards">
+          <h1>Dashboard Studio</h1>
+          <div class="card" style="margin-top:16px;">
+            <table class="datatable" id="dashboardListTable">
+              <thead>
+                <tr><th>Name</th><th>ID</th><th>Creator</th><th>Created</th><th>Last Editor</th><th>Edited</th><th>Action</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VIEW: DASHBOARD DETAIL -->
+        <div class="view-panel" id="view-dashboarddetail">
+          <button onclick="showView('dashboards')" class="secondary">&larr; Back to Dashboards</button>
+          <div style="margin-top:12px; display:flex; gap:12px; align-items:center;">
+            <input type="text" id="dashTitleInput" style="font-size:18px; font-weight:700;">
+          </div>
+          <div id="widgetGrid" class="edit-grid" style="margin-top:20px;"></div>
+        </div>
+
+        <!-- VIEW: USER PROFILE -->
+        <div class="view-panel" id="view-profile">
+          <h1>User Settings & Profile</h1>
+          <div class="card" style="margin-top:16px;">
+            <div class="card-title">Theme Options</div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
+              <span>Light Mode</span>
+              <label class="toggle-pill">
+                <input type="checkbox" id="themeToggle">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
