@@ -1,1 +1,36 @@
 
+.etl-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.etl-tile {
+  background: var(--panel-bg);
+  border: var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.etl-tile:hover {
+  border-color: var(--accent-primary);
+  background: var(--panel-hover);
+  transform: translateY(-2px);
+}
+
+.etl-tile svg {
+  width: 36px;
+  height: 36px;
+  color: var(--accent-primary);
+  margin-bottom: 12px;
+}
+
+.etl-tile .tile-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+}
