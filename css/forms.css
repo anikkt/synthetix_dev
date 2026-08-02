@@ -1,1 +1,85 @@
 
+input[type="text"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  background: var(--panel-solid);
+  border: var(--glass-border);
+  color: var(--text-main);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-primary);
+}
+
+button {
+  background: var(--accent-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button.secondary {
+  background: var(--panel-solid);
+  border: var(--glass-border);
+  color: var(--text-main);
+}
+
+button.secondary:hover {
+  background: var(--panel-hover);
+}
+
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.toggle-pill input { display: none; }
+
+.toggle-track {
+  width: 36px;
+  height: 20px;
+  background: var(--panel-solid);
+  border: var(--glass-border);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: background var(--transition-fast);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: left var(--transition-fast), background var(--transition-fast);
+}
+
+.toggle-pill input:checked + .toggle-track {
+  background: var(--accent-primary);
+}
+
+.toggle-pill input:checked + .toggle-track .toggle-thumb {
+  left: 18px;
+  background: #ffffff;
+}
