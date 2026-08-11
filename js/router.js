@@ -7,6 +7,15 @@ function toggleSection() {
   document.getElementById('sub-data').classList.toggle('open');
 }
 
+function openSidebarProfileMenu(el) {
+  showMiniMenu(el, [
+    { label: 'View profile', fn: "showView('profile')" },
+    { label: 'Help center', fn: "showView('helpcenter')" },
+    { divider: true },
+    { label: 'Sign out', fn: 'logout()' }
+  ]);
+}
+
 
 function showView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -15,23 +24,26 @@ function showView(view) {
 
   document.getElementById('view-' + view).classList.add('active');
 
-  if (view === 'newsource' || view === 'existingdata') {
+  if (view === 'home') {
+    document.querySelector('.nav-item[data-view="home"]').classList.add('active');
+  } else if (view === 'newsource' || view === 'existingdata') {
     document.getElementById('nav-data').classList.add('active');
     document.querySelector(`.nav-subitem[data-view="${view}"]`).classList.add('active');
   } else if (view === 'dashboards' || view === 'dashboarddetail') {
     document.querySelector('.nav-item[data-view="dashboards"]').classList.add('active');
-  } else if (view === 'profile') {
-    document.querySelector('.nav-item[data-view="profile"]').classList.add('active');
   } else if (view === 'processflow' || view === 'processflowdetail' || view === 'processflowdata') {
     document.querySelector('.nav-item[data-view="processflow"]').classList.add('active');
   }
+  // 'profile' and 'helpcenter' are reached via the sidebar profile popup, not a persistent nav item.
 
+  if (view === 'home') refreshHomeView();
   if (view === 'existingdata') refreshExistingDataTable();
   if (view === 'dashboards') refreshDashboardListTable();
   if (view === 'dashboarddetail') renderWidgets();
   if (view === 'processflowdata') pfPopulateTables();
   if (view === 'processflow') refreshProcessFlowListTable();
   if (view === 'processflowdetail') renderProcessFlow();
+  if (view === 'helpcenter') renderFAQAccordion();
 }
 
 /* ---- Reusable confirm modal (used for dashboard/process-flow deletes) ---- */

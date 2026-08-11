@@ -38,6 +38,15 @@ async function ensureUserDoc(user) {
   if (nameEl) nameEl.value = data.name;
   const emailEl = document.getElementById('profEmail');
   if (emailEl) emailEl.textContent = data.email;
+  const roleLabel = currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1);
+  const profRoleEl = document.getElementById('profRole');
+  if (profRoleEl) profRoleEl.value = roleLabel;
+  const sbName = document.getElementById('sidebarProfileName');
+  if (sbName) sbName.textContent = data.name;
+  const sbRole = document.getElementById('sidebarProfileRole');
+  if (sbRole) sbRole.textContent = roleLabel;
+  const avatar = document.getElementById('profileAvatarInitial');
+  if (avatar) avatar.textContent = (data.name || '?').charAt(0).toUpperCase();
 }
 
 async function loginWithEmail() {

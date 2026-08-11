@@ -4,6 +4,7 @@ async function initAppData() {
   refreshTableList();
   refreshExistingDataTable();
   refreshDashboardListTable();
+  refreshHomeView();
   tryReconnectFolder();
 }
 initAuthListener();
@@ -35,5 +36,6 @@ document.getElementById('importInput').addEventListener('change', async (e) => {
   refreshTableList();
   refreshExistingDataTable();
   refreshDashboardListTable();
+  refreshHomeView();
   saveStateToStorage();
 });
