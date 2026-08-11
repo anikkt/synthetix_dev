@@ -1,0 +1,32 @@
+#loginScreen{
+  display:none; /* toggled to flex by auth.js once we know the user is signed out */
+  height:100vh; width:100vw;
+}
+.login-form-side{
+  width:420px; max-width:90vw; flex-shrink:0;
+  padding:48px 40px; display:flex; flex-direction:column;
+  background:var(--panel); border-right:1px solid var(--border);
+  overflow-y:auto;
+}
+.login-brand{font-size:18px;font-weight:700;letter-spacing:-.01em;}
+.login-brand span{color:var(--accent);}
+.login-form-side label{display:block;margin-top:2px;}
+.login-form-side input{width:100%;margin-top:4px;}
+.login-art-side{
+  flex:1;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(79,140,255,.25), transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(63,214,160,.18), transparent 45%),
+    var(--bg);
+  position:relative; overflow:hidden;
+}
+.login-art-side::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.12) 1.5px, transparent 1.5px);
+  background-size:26px 26px;
+}
+@media (max-width: 760px){
+  .login-art-side{display:none;}
+  .login-form-side{width:100%;}
+}

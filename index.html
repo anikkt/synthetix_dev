@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Data Viz Platform</title>
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/forms.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/widgets.css">
+<link rel="stylesheet" href="css/process.css">
+<link rel="stylesheet" href="css/modals.css">
+<link rel="stylesheet" href="css/auth.css">
+<!-- Firebase (CDN, compat/namespaced build — matches this app's plain-script style, no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen">
+  <div class="login-form-side">
+    <div class="login-brand">Data<span>Viz</span></div>
+    <h1 style="margin-top:40px;">Sign in</h1>
+    <p class="subtitle">Sign in to access your dashboards, process flows, and data.</p>
+    <label style="font-size:12px;color:var(--text-dim);">Email</label>
+    <input type="email" id="loginEmail" placeholder="you@company.com" onkeydown="if(event.key==='Enter')loginWithEmail()">
+    <label style="font-size:12px;color:var(--text-dim);margin-top:12px;display:block;">Password</label>
+    <input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginWithEmail()">
+    <div id="loginMsg" class="err" style="min-height:18px;margin-top:8px;"></div>
+    <button style="width:100%;margin-top:8px;" onclick="loginWithEmail()">Sign in</button>
+    <p class="subtitle" style="margin-top:16px;">Accounts are created by an administrator — contact your admin if you don't have one yet.</p>
+  </div>
+  <div class="login-art-side"></div>
+</div>
+
+<div id="app" style="display:none;">
+
+  <!-- ================= SIDEBAR ================= -->
+  <div id="sidebar">
+    <div class="brand-row">
+      <div class="brand">Data<span>Viz</span></div>
+      <button id="pinBtn" title="Collapse sidebar" onclick="toggleSidebar()">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="nav-item open" id="nav-data" onclick="toggleSection()">
+      <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span>
+      <span class="label">Data</span>
+      <span class="chevron">&#9662;</span>
+    </div>
+    <div class="nav-sub open" id="sub-data">
+      <div class="nav-subitem active" data-view="newsource" onclick="showView('newsource')">New source</div>
+      <div class="nav-subitem" data-view="existingdata" onclick="showView('existingdata')">Existing data</div>
+    </div>
+
+    <div class="nav-item" data-view="processflow" onclick="showView('processflow')">
+      <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="4" cy="6" r="2.5"/><circle cx="20" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M6.3 7.3L10 16.5M17.7 7.3L14 16.5"/></svg></span>
+      <span class="label">Process Flow</span>
+    </div>
+
+    <div class="nav-item" data-view="dashboards" onclick="showView('dashboards')">
+      <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>
+      <span class="label">Dashboards</span>
+    </div>
+
+    <div class="nav-item" data-view="profile" onclick="showView('profile')">
+      <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+      <span class="label">User profile</span>
+    </div>
+
+    <div class="footer">Offline build &middot; v0.3 scaffold<div id="saveStatus" style="margin-top:4px;"></div></div>
+  </div>
+
+  <!-- ================= WORKSPACE ================= -->
+  <div id="workspace">
+    <div id="storageBanner" class="card" style="display:none;border-color:var(--danger);"></div>
+
+    <!-- ============ NEW SOURCE ============ -->
+    <div class="view active" id="view-newsource">
+      <h1>New source</h1>
+      <p class="subtitle">Extract data into the warehouse. Merge, transform with SQL, and write back to disk now live under Existing data.</p>
+
+      <div class="tile-grid">
+        <div class="tile" onclick="document.getElementById('fileInput').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M4 21h16"/></svg>
+          <div>File upload</div>
+        </div>
+        <div class="tile" onclick="openSharePointModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12a4 4 0 0 1 4-4h1a4 4 0 1 1 0 8h-1"/><path d="M16 12a4 4 0 0 1-4 4H11a4 4 0 1 1 0-8h1"/></svg>
+          <div>SharePoint / OneDrive</div>
+        </div>
+        <div class="tile" onclick="openS3Modal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l8-4 8 4-8 4-8-4z"/><path d="M4 7v10l8 4 8-4V7"/><path d="M12 11v10"/></svg>
+          <div>Amazon S3</div>
+        </div>
+        <div class="tile" onclick="alert('Reference another pipeline / component as a source here.')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M10 6.5h4a2 2 0 0 1 2 2V14"/></svg>
+          <div>Pipeline component</div>
+        </div>
+        <div class="tile" onclick="connectFolder()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+          <div>Local folder</div>
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,.tsv,.xlsx" multiple style="display:none;">
+      <div id="uploadMsg" class="err"></div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="between">
+          <b>Local folder</b>
+          <button class="secondary" onclick="listFolderFiles()">Refresh</button>
+        </div>
+        <p class="subtitle" style="margin:4px 0 8px;">
+          Connect a folder (e.g. the one this file lives in) and load CSV/TSV straight from disk.
+          Hit Refresh any time you add a new file to that folder. Needs Chrome or Edge — File System Access API may be blocked on managed corporate browsers.
+        </p>
+        <div id="folderReconnectMsg" class="subtitle"></div>
+        <div id="folderFileList" class="row" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <b>Extracted this session</b>
+        <div id="tableList" class="row" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <!-- ============ EXISTING DATA ============ -->
+    <div class="view" id="view-existingdata">
+      <h1>Existing data</h1>
+      <p class="subtitle">Browse warehouse tables, merge or transform them with SQL, or write a table back to your connected folder.</p>
+
+      <div class="subtabs">
+        <div class="subtab active" data-sub="edtables" onclick="showSubtab('edtables')">Tables</div>
+        <div class="subtab" data-sub="edmerge" onclick="showSubtab('edmerge')">Merge</div>
+        <div class="subtab" data-sub="edtransform" onclick="showSubtab('edtransform')">Transform</div>
+        <div class="subtab" data-sub="edwriteback" onclick="showSubtab('edwriteback')">Write back</div>
+      </div>
+
+      <!-- Tables -->
+      <div class="subpanel active" id="subpanel-edtables">
+        <div class="card">
+          <div class="table-scroll">
+            <table class="datatable" id="existingDataTable">
+              <thead><tr><th>Name</th><th>Rows</th><th>Columns</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <b>Preview</b>
+          <div id="previewArea2" class="table-scroll" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Merge -->
+      <div class="subpanel" id="subpanel-edmerge">
+        <div class="card">
+          <b>Merge sources</b>
+          <p class="subtitle" style="margin:4px 0 12px;">Placeholder — combine two extracted tables on a shared key.</p>
+          <div class="row">
+            <select id="mergeA"></select>
+            <span style="color:var(--text-dim);">join</span>
+            <select id="mergeB"></select>
+            <span style="color:var(--text-dim);">on</span>
+            <input type="text" id="mergeKey" placeholder="key column">
+            <button class="secondary" onclick="alert('Merge is a placeholder in this scaffold — implement a join in executeSQL or here directly.')">Merge (stub)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transform -->
+      <div class="subpanel" id="subpanel-edtransform">
+        <div class="card">
+          <b>SQL transform</b>
+          <p class="subtitle" style="margin:4px 0 8px;">
+            SELECT cols FROM table [WHERE col = / != / &gt; / &lt; value] [GROUP BY col] &mdash; aggregates: COUNT(*), COUNT(DISTINCT col), SUM(col), AVG(col), MIN(col), MAX(col).
+            Also works ungrouped for a single aggregate value, e.g. SELECT SUM(amount) FROM sales.
+          </p>
+          <textarea id="sqlInput" placeholder="SELECT region, SUM(amount) FROM sales GROUP BY region"></textarea>
+          <div class="row" style="margin-top:8px;">
+            <input type="text" id="saveAsName" placeholder="save as table name (e.g. sales_by_region)">
+            <button onclick="runETL()">Run</button>
+          </div>
+          <div id="sqlErr" class="err"></div>
+        </div>
+        <div class="card">
+          <b>Preview</b>
+          <div id="previewArea" class="table-scroll" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Write back -->
+      <div class="subpanel" id="subpanel-edwriteback">
+        <div class="card">
+          <b>Write back to local folder</b>
+          <p class="subtitle" style="margin:4px 0 8px;">
+            Writes a warehouse table (including anything built in Transform) out as a real CSV file in your connected folder —
+            new file if the name doesn't exist, overwrite if it does. Needs the same folder connected under
+            Data &gt; New source &gt; Local folder, plus a one-time write-permission prompt.
+          </p>
+          <div class="row">
+            <select id="wbf-table"><option value="">Select table</option></select>
+            <input type="text" id="wbf-filename" placeholder="filename.csv (optional — defaults to table name)">
+            <button onclick="writeBackToFolder()">Write to folder</button>
+          </div>
+          <div id="writeBackMsg" class="subtitle" style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PROCESS FLOW DATA (config, scoped to one process flow entry) ============ -->
+    <div class="view" id="view-processflowdata">
+      <button class="link" onclick="pfBackFromConfig()">&larr; Back</button>
+      <h1 style="margin-top:8px;">Process flow data</h1>
+      <p class="subtitle">Pick a table and map its Case ID, Activity, and Timestamp columns to build this process map.</p>
+      <div class="card">
+        <div class="row">
+          <select id="pf-table" onchange="pfPopulateColumns()"><option value="">Select table</option></select>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <div>
+            <label style="font-size:12px;color:var(--text-dim);">Case ID column</label><br>
+            <select id="pf-case"></select>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text-dim);">Activity column</label><br>
+            <select id="pf-activity"></select>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text-dim);">Timestamp column</label><br>
+            <select id="pf-time"></select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:14px;">
+          <button onclick="buildProcessFlow()">Build process flow</button>
+        </div>
+        <div id="pfConfigMsg" class="subtitle" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <!-- ============ PROCESS FLOW LIST ============ -->
+    <div class="view" id="view-processflow">
+      <div class="between" style="margin-bottom:6px;">
+        <h1>Process Flow</h1>
+        <button onclick="createProcessFlow()">+ Add new</button>
+      </div>
+      <p class="subtitle">Directly-follows process maps built from your case/activity/timestamp data.</p>
+      <div class="card">
+        <table class="datatable" id="processFlowListTable">
+          <thead><tr><th>Name</th><th>ID</th><th>Creator</th><th>Created</th><th>Last editor</th><th>Edited</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ PROCESS FLOW DETAIL (diagram) ============ -->
+    <div class="view" id="view-processflowdetail">
+      <button class="link" onclick="showView('processflow')">&larr; Back to Process Flow</button>
+      <div class="between" style="margin:8px 0;align-items:center;">
+        <input type="text" id="pfTitleInput" style="font-size:16px;font-weight:600;background:transparent;border:none;padding:2px 0;flex:1;" onchange="renameProcessFlow(this.value)">
+        <div class="row" style="flex-shrink:0;">
+          <button class="secondary" onclick="openProcessFlowConfig(State.currentProcessFlowId)">Edit data mapping</button>
+          <button class="secondary" onclick="renderProcessFlow()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:10px 14px;margin-bottom:10px;">
+        <div class="row" style="align-items:flex-start;gap:24px;">
+          <label style="font-size:11px;color:var(--text-dim);flex:1;min-width:220px;">
+            Activities: <b id="pfActivityPctLabel">100%</b>
+            <input type="range" id="pfActivitySlider" min="1" max="100" value="100" style="width:100%;margin-top:2px;" oninput="pfOnSliderChange()">
+          </label>
+          <label style="font-size:11px;color:var(--text-dim);flex:1;min-width:220px;">
+            Paths (variation): <b id="pfPathPctLabel">100%</b>
+            <input type="range" id="pfPathSlider" min="1" max="100" value="100" style="width:100%;margin-top:2px;" oninput="pfOnSliderChange()">
+          </label>
+          <div class="row" id="pfSummary" style="gap:6px;flex-shrink:0;"></div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-bottom:8px;font-size:11px;color:var(--text-dim);align-items:center;gap:14px;">
+        <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#3fd6a0;margin-right:3px;"></span>Start</span>
+        <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e2554f;margin-right:3px;"></span>End</span>
+        <span><span style="display:inline-block;width:12px;height:2px;background:#e2554f;margin-right:3px;vertical-align:middle;"></span>Rework</span>
+        <span style="border-left:1px solid var(--border);padding-left:14px;">Edge = avg time between steps &middot; node = occurrences + repeats</span>
+        <span style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+          <button class="secondary" onclick="pfZoomOut()" style="padding:4px 10px;">&minus;</button>
+          <span id="pfZoomLabel" style="min-width:36px;text-align:center;">100%</span>
+          <button class="secondary" onclick="pfZoomIn()" style="padding:4px 10px;">+</button>
+          <button class="secondary" onclick="pfZoomFit()" style="padding:4px 10px;">Fit</button>
+          <button class="secondary" onclick="pfZoomReset()" style="padding:4px 10px;">100%</button>
+          <button class="secondary" onclick="pfResetLayout()" style="padding:4px 10px;">Reset layout</button>
+        </span>
+      </div>
+
+      <div class="card" style="padding:8px;">
+        <div class="pf-scroll" id="processFlowCanvas"></div>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARDS LIST ============ -->
+    <div class="view" id="view-dashboards">
+      <div class="between" style="margin-bottom:6px;">
+        <h1>Dashboards <span class="badge">New</span></h1>
+        <button onclick="createDashboard()">+ Add new</button>
+      </div>
+      <p class="subtitle">Widget-driven dashboards built on warehouse tables.</p>
+      <div class="card">
+        <table class="datatable" id="dashboardListTable">
+          <thead><tr><th>Name</th><th>ID</th><th>Creator</th><th>Created</th><th>Last editor</th><th>Edited</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARD DETAIL ============ -->
+    <div class="view" id="view-dashboarddetail">
+      <button class="link" onclick="showView('dashboards')">&larr; Back to dashboards</button>
+      <div class="between" style="margin:8px 0 12px;align-items:center;">
+        <input type="text" id="dashTitleInput" style="font-size:16px;font-weight:600;background:transparent;border:none;padding:2px 0;flex:1;" onchange="renameDashboard(this.value)">
+        <div class="row" style="flex-shrink:0;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:var(--text-dim);">Edit</span>
+          <label class="toggle-pill">
+            <input type="checkbox" id="dashEditToggle" checked onchange="toggleDashEditMode()">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+          <button onclick="openWidgetBuilder()" id="btnAddWidget">+ Add widget</button>
+          <button class="secondary" onclick="undoWidgets()" id="btnUndo" title="Undo">&#8634;</button>
+          <button class="secondary" onclick="redoWidgets()" id="btnRedo" title="Redo">&#8635;</button>
+          <button class="secondary" onclick="refreshCharts()" title="Refresh charts">&#8635; Refresh</button>
+        </div>
+      </div>
+
+      <div id="widgetBuilder"></div>
+
+      <div id="widgetGrid"></div>
+    </div>
+
+    <!-- ============ USER PROFILE ============ -->
+    <div class="view" id="view-profile">
+      <h1>User Profile</h1>
+      <p class="subtitle">Session info and workspace export/import.</p>
+      <div class="card">
+        <div class="row">
+          <div>
+            <label style="font-size:12px;color:var(--text-dim);">Signed in as</label><br>
+            <span id="profEmail" style="font-size:14px;">—</span>
+          </div>
+          <button class="secondary" onclick="logout()" style="margin-left:auto;">Sign out</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div>
+            <label style="font-size:12px;color:var(--text-dim);">Name</label><br>
+            <input type="text" id="profName" value="Ankit">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text-dim);">Role</label><br>
+            <input type="text" id="profRole" value="Senior Process Mining Specialist">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <b>Appearance</b>
+        <div class="row" style="margin-top:8px;align-items:center;">
+          <span style="font-size:12px;color:var(--text-dim);">Dark</span>
+          <label class="toggle-pill">
+            <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+          <span style="font-size:12px;color:var(--text-dim);">Light</span>
+        </div>
+      </div>
+      <div class="card">
+        <b>Workspace</b>
+        <p class="subtitle" style="margin:4px 0 8px;">No backend &mdash; export the full state to a JSON file and re-import it later.</p>
+        <div class="row">
+          <button onclick="exportWorkspace()">Export workspace (.json)</button>
+          <input type="file" id="importInput" accept=".json">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="chartTooltip" class="chart-tooltip" style="display:none;"></div>
+<div id="confirmModal">
+  <div class="card">
+    <p id="confirmModalMsg" style="margin:0 0 16px;"></p>
+    <div class="row" style="justify-content:flex-end;">
+      <button class="secondary" onclick="closeConfirmModal(false)">Cancel</button>
+      <button onclick="closeConfirmModal(true)" style="background:var(--danger);">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="sharepointModal" class="modal-overlay">
+  <div class="card">
+    <b>Connect SharePoint / OneDrive</b>
+    <p class="subtitle" style="margin:6px 0 12px;">
+      Paste a shareable link to a file. This only works if the link allows a direct, CORS-permitting download —
+      many corporate SharePoint/OneDrive links block this by default due to auth and CORS restrictions; this is a best-effort connector.
+    </p>
+    <label style="font-size:12px;color:var(--text-dim);">Shareable link</label>
+    <input type="text" id="spLink" placeholder="https://yourtenant.sharepoint.com/... or https://1drv.ms/...">
+    <label style="font-size:12px;color:var(--text-dim);margin-top:10px;display:block;">Save as table name (optional)</label>
+    <input type="text" id="spTableName" placeholder="defaults to filename">
+    <div id="spMsg" class="err" style="margin-top:8px;"></div>
+    <div class="row" style="justify-content:flex-end;margin-top:14px;">
+      <button class="secondary" onclick="closeSharePointModal()">Cancel</button>
+      <button onclick="extractFromSharePoint()">Extract</button>
+    </div>
+  </div>
+</div>
+
+<div id="s3Modal" class="modal-overlay">
+  <div class="card">
+    <b>Connect Amazon S3</b>
+    <p class="subtitle" style="margin:6px 0 12px;">Placeholder connector — these fields aren't wired to a real S3 call in this scaffold.</p>
+    <label style="font-size:12px;color:var(--text-dim);">Access key / username</label>
+    <input type="text" id="s3User" placeholder="AKIA...">
+    <label style="font-size:12px;color:var(--text-dim);margin-top:8px;display:block;">Secret key / password</label>
+    <input type="password" id="s3Pass" placeholder="••••••••">
+    <div class="row" style="margin-top:8px;">
+      <div style="flex:1;">
+        <label style="font-size:12px;color:var(--text-dim);">Path (bucket/prefix)</label>
+        <input type="text" id="s3Path" placeholder="my-bucket/exports/">
+      </div>
+      <div style="width:100px;">
+        <label style="font-size:12px;color:var(--text-dim);">Port</label>
+        <input type="text" id="s3Port" placeholder="443">
+      </div>
+    </div>
+    <label style="font-size:12px;color:var(--text-dim);margin-top:8px;display:block;">Table name</label>
+    <input type="text" id="s3Table" placeholder="table name to create">
+    <div id="s3Msg" class="subtitle" style="margin-top:8px;"></div>
+    <div class="row" style="margin-top:14px;justify-content:flex-start;">
+      <button class="secondary" onclick="testS3Connection()">Test connection</button>
+      <button class="secondary" onclick="closeS3Modal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/firebaseConfig.js"></script>
+<script src="js/state.js"></script>
+<script src="js/helpers.js"></script>
+<script src="js/router.js"></script>
+<script src="js/confirmModal.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/folderConnect.js"></script>
+<script src="js/dataHubConnectors.js"></script>
+<script src="js/dataHub.js"></script>
+<script src="js/sql.js"></script>
+<script src="js/processMap.js"></script>
+<script src="js/widgetLibrary.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/widgetBuilder.js"></script>
+<script src="js/widgetRenderer.js"></script>
+<script src="js/themeManager.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
