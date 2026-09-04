@@ -312,37 +312,56 @@
         </div>
       </div>
 
-      <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-        <div class="row" style="align-items:flex-start;gap:24px;">
-          <label style="font-size:11px;color:var(--text-dim);flex:1;min-width:220px;">
-            Activities: <b id="pfActivityPctLabel">100%</b>
-            <input type="range" id="pfActivitySlider" min="1" max="100" value="100" style="width:100%;margin-top:2px;" oninput="pfOnSliderChange()">
-          </label>
-          <label style="font-size:11px;color:var(--text-dim);flex:1;min-width:220px;">
-            Paths (variation): <b id="pfPathPctLabel">100%</b>
-            <input type="range" id="pfPathSlider" min="1" max="100" value="100" style="width:100%;margin-top:2px;" oninput="pfOnSliderChange()">
-          </label>
-          <div class="row" id="pfSummary" style="gap:6px;flex-shrink:0;"></div>
+      <div class="row" id="pfSummary" style="gap:6px;margin-bottom:10px;"></div>
+
+      <div class="pf-layout">
+        <!-- Canvas + floating zoom toolbar -->
+        <div class="card pf-canvas-card">
+          <div class="pf-zoom-toolbar">
+            <button class="secondary" onclick="pfZoomOut()" title="Zoom out">&minus;</button>
+            <span id="pfZoomLabel">100%</span>
+            <button class="secondary" onclick="pfZoomIn()" title="Zoom in">+</button>
+            <button class="secondary" onclick="pfZoomFit()" title="Fit to screen">Fit</button>
+          </div>
+          <div class="pf-scroll" id="processFlowCanvas"></div>
+          <div class="pf-legend">
+            <span><span class="pf-dot" style="background:var(--positive);"></span>Start</span>
+            <span><span class="pf-dot" style="background:var(--danger);"></span>End</span>
+            <span><span class="pf-line" style="background:var(--danger);"></span>Rework</span>
+            <span class="pf-legend-note">Edge = avg time between steps &middot; node = occurrences + repeats</span>
+          </div>
         </div>
-      </div>
 
-      <div class="row" style="margin-bottom:8px;font-size:11px;color:var(--text-dim);align-items:center;gap:14px;">
-        <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#3fd6a0;margin-right:3px;"></span>Start</span>
-        <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e2554f;margin-right:3px;"></span>End</span>
-        <span><span style="display:inline-block;width:12px;height:2px;background:#e2554f;margin-right:3px;vertical-align:middle;"></span>Rework</span>
-        <span style="border-left:1px solid var(--border);padding-left:14px;">Edge = avg time between steps &middot; node = occurrences + repeats</span>
-        <span style="margin-left:auto;display:flex;gap:6px;align-items:center;">
-          <button class="secondary" onclick="pfZoomOut()" style="padding:4px 10px;">&minus;</button>
-          <span id="pfZoomLabel" style="min-width:36px;text-align:center;">100%</span>
-          <button class="secondary" onclick="pfZoomIn()" style="padding:4px 10px;">+</button>
-          <button class="secondary" onclick="pfZoomFit()" style="padding:4px 10px;">Fit</button>
-          <button class="secondary" onclick="pfZoomReset()" style="padding:4px 10px;">100%</button>
-          <button class="secondary" onclick="pfResetLayout()" style="padding:4px 10px;">Reset layout</button>
-        </span>
-      </div>
+        <!-- Right panel: Activities / Connections, like the Celonis reference -->
+        <div class="pf-side-panel">
+          <div class="card pf-ring-card">
+            <b>Activities</b>
+            <div class="pf-ring" id="pfActivityRing" style="--pct:100;">
+              <div class="pf-ring-inner"><span id="pfActivityPctLabel">100%</span><small>of activities</small></div>
+            </div>
+            <div class="row" style="justify-content:center;gap:8px;">
+              <button class="secondary" onclick="pfStepSlider('pfActivitySlider', -5)">Less</button>
+              <button class="secondary" onclick="pfStepSlider('pfActivitySlider', 5)">More</button>
+            </div>
+            <button class="secondary" style="width:100%;margin-top:8px;" onclick="pfResetSlider('pfActivitySlider')">Reset</button>
+            <input type="range" id="pfActivitySlider" min="1" max="100" value="100" style="width:100%;margin-top:12px;" oninput="pfOnSliderChange()">
+          </div>
 
-      <div class="card" style="padding:8px;">
-        <div class="pf-scroll" id="processFlowCanvas"></div>
+          <div class="card pf-ring-card">
+            <b>Connections</b>
+            <div class="pf-ring" id="pfPathRing" style="--pct:100;">
+              <div class="pf-ring-inner"><span id="pfPathPctLabel">100%</span><small>of connections</small></div>
+            </div>
+            <div class="row" style="justify-content:center;gap:8px;">
+              <button class="secondary" onclick="pfStepSlider('pfPathSlider', -5)">Less</button>
+              <button class="secondary" onclick="pfStepSlider('pfPathSlider', 5)">More</button>
+            </div>
+            <button class="secondary" style="width:100%;margin-top:8px;" onclick="pfResetSlider('pfPathSlider')">Reset</button>
+            <input type="range" id="pfPathSlider" min="1" max="100" value="100" style="width:100%;margin-top:12px;" oninput="pfOnSliderChange()">
+          </div>
+
+          <button class="secondary" style="width:100%;" onclick="pfResetLayout()">Reset layout</button>
+        </div>
       </div>
     </div>
 
