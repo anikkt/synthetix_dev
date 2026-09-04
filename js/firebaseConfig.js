@@ -7,12 +7,13 @@
    Safe to commit this file to a public GitHub repo as-is once filled in.
    ============================================================ */
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_PROJECT.firebaseapp.com",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID"
+  apiKey: "AIzaSyD39-d20BMYP1myfTmgODx9DIy4rPdYSCE",
+  authDomain: "synthetix-e87b7.firebaseapp.com",
+  projectId: "synthetix-e87b7",
+  storageBucket: "synthetix-e87b7.firebasestorage.app",
+  messagingSenderId: "307837929902",
+  appId: "1:307837929902:web:1607f6da3793380d62e03f",
+  measurementId: "G-HBH58YFZFH"
 };
 
 firebase.initializeApp(firebaseConfig);
