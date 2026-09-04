@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isAdmin() { return isSignedIn() && myRole() == 'admin'; }
+
+    // ---- Users ----
+    // Any signed-in user can read the directory (needed for the dashboard Share
+    // picker and the Admin Users page to list people at all).
+    // Anyone can create/update their own doc's name; only an admin can change
+    // someone's `role` field (including their own — an admin can't demote
+    // themself into a state nobody can undo, by design of this check only
+    // blocking non-admins from changing role, not blocking admins from anything).
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (
+        request.auth.uid == userId &&
+        (!('role' in request.resource.data) || request.resource.data.role == resource.data.role)
+      ) || isAdmin();
+
+      // Per-user private data: tables (Data Warehouse) and process flows.
+      match /appState/{docId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    // ---- Dashboards ----
+    // A real top-level collection (not nested under a user) so a specific
+    // dashboard can be granted to a specific other user — that's what makes
+    // sharing possible. sharedWith is a map of {uid: 'viewer'|'analyst'};
+    // sharedUids is a redundant array of the same uids, kept in sync purely
+    // so client queries can use array-contains (Firestore can't query map-key
+    // existence directly).
+    match /dashboards/{dashId} {
+      allow read: if isSignedIn() && (
+        resource.data.ownerUid == request.auth.uid ||
+        isAdmin() ||
+        request.auth.uid in resource.data.sharedWith
+      );
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isSignedIn() && (
+        resource.data.ownerUid == request.auth.uid ||
+        isAdmin() ||
+        resource.data.sharedWith[request.auth.uid] == 'analyst'
+      );
+    }
+
+    // Everything else: deny by default (Firestore's default when no rule matches).
+  }
+}

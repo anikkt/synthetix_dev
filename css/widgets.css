@@ -1,0 +1,12 @@
+/* Right-side edit/add-widget drawer */
+#widgetBuilder{position:fixed;top:0;right:0;height:100vh;width:380px;max-width:90vw;
+  background:var(--glass-bg);border-left:1px solid var(--glass-border);box-shadow:-8px 0 40px rgba(0,0,0,.45);
+  backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));
+  padding:20px;overflow-y:auto;transform:translateX(100%);transition:transform .25s var(--ease);z-index:60;}
+#widgetBuilder.open{transform:translateX(0);}
+.olap-col-list{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;margin-top:6px;background:var(--panel2);}
+.olap-col-list label{display:block;font-size:13px;padding:4px 2px;}
+
+/* Text box / Image widget content */
+.widget-textbox{padding:4px 2px;}
+.widget-image{display:flex;align-items:center;justify-content:center;overflow:hidden;}
